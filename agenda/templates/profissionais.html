@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{% static 'index/img/favicon.ico' %}">
+    <title>Profissionais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <script src="{% static 'theme.js' %}" defer></script>
+    <style>
+        .prof-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .prof-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 18px;
+        }
+
+        .prof-info { display: flex; align-items: center; gap: 14px; }
+
+        .prof-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .prof-name { font-weight: 600; color: var(--text-primary); }
+        .prof-meta { font-size: 0.78rem; color: var(--text-muted); }
+
+        .prof-actions { display: flex; align-items: center; gap: 10px; }
+
+        .btn-toggle-active {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-primary);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-toggle-active:hover { background: var(--surface); }
+
+        .btn-add-prof {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--accent2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .btn-add-prof:hover { background: var(--accent2-light); }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <img src="{% static 'home/img/logo.png' %}" alt="Logo" class="logo-img">
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="header-user">
+                <i class="fas fa-user-circle"></i> {{ user.get_full_name|default:user.email }}
+            </span>
+            <form method="post" action="{% url 'account_logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="header-logout" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <nav class="nav-buttons">
+            <a href="{% url 'agenda' %}" class="nav-btn">
+                <i class="far fa-calendar"></i><span>Agenda</span>
+            </a>
+            {% if user.is_staff %}
+            <a href="{% url 'profissionais' %}" class="nav-btn active">
+                <i class="fas fa-users"></i><span>Profissionais</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="content-wrapper">
+            <main class="main-content">
+                <div class="page-header" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <div>
+                        <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 14px;">
+                            <div style="width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            Profissionais
+                        </h1>
+                        <p style="margin: 6px 0 0 62px; color: var(--text-muted); font-size: 0.95rem;">Quem pode acessar a agenda.</p>
+                    </div>
+                    <a href="{% url 'criar_profissional' %}" class="btn-add-prof">
+                        <i class="fas fa-plus"></i> Novo profissional
+                    </a>
+                </div>
+
+                <div class="card">
+                    <div class="prof-list">
+                        {% for p in profissionais %}
+                        <div class="prof-row">
+                            <div class="prof-info">
+                                <div class="prof-avatar">{{ p.username|first|upper }}</div>
+                                <div>
+                                    <div class="prof-name">{{ p.get_full_name|default:p.username }}</div>
+                                    <div class="prof-meta">
+                                        {{ p.username }}{% if p.email %} · {{ p.email }}{% endif %}
+                                        {% if p.is_staff %} · <span class="badge badge-gold">admin</span>{% endif %}
+                                        {% if not p.is_active %} · <span class="badge badge-danger">inativo</span>{% else %} · <span class="badge badge-success">ativo</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="prof-actions">
+                                {% if p != user %}
+                                <form method="post" action="{% url 'alternar_ativo_profissional' p.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-toggle-active">
+                                        {% if p.is_active %}Desativar{% else %}Reativar{% endif %}
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>

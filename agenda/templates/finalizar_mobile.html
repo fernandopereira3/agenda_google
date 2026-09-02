@@ -1,0 +1,629 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/x-icon" href="{% static 'index/img/favicon.ico' %}">
+    <title>Fechar Atendimento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <script src="{% static 'theme.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'agenda/css/agenda.css' %}?v=7">
+    <style>
+        body { display: block; overflow-x: hidden; background: var(--bg2); }
+
+        .fm-header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+        }
+        .fm-header a {
+            color: var(--text-primary); font-size: 18px;
+            display: flex; align-items: center; text-decoration: none;
+        }
+        .fm-header h1 {
+            margin: 0; font-size: 17px; font-weight: 600;
+            color: var(--text-primary); flex: 1;
+        }
+
+        .fm-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+        .fm-card {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden;
+        }
+        .fm-card-header {
+            padding: 10px 14px; border-bottom: 1px solid var(--border);
+            font-size: 14px; font-weight: 600; color: var(--text-primary);
+        }
+        .fm-card-body { padding: 12px 14px; }
+
+        /* Client info rows */
+        .fm-info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 5px 0; font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        .fm-info-row:last-child { border-bottom: none; }
+        .fm-info-row span:first-child { color: var(--text-muted); }
+        .fm-info-row span:last-child { font-weight: 500; color: var(--text-primary); }
+
+        /* Tabs */
+        .fm-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .fm-tab {
+            flex: 1; padding: 8px 0; border-radius: 8px; border: none;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.15s;
+        }
+        .fm-tab.active { background: #c5e1a5; color: #33691E; }
+        .fm-tab:not(.active) { background: var(--bg2); color: var(--text-muted); }
+
+        /* Service/product row card */
+        .fm-item-row {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 12px;
+            margin-bottom: 8px; position: relative;
+        }
+        .fm-item-row select,
+        .fm-item-row input[type="text"],
+        .fm-item-row input[type="number"] {
+            width: 100%; padding: 8px 10px; font-size: 14px;
+            border: 1px solid var(--border); border-radius: 7px;
+            background: var(--bg); color: var(--text-primary);
+            box-sizing: border-box;
+        }
+        .fm-item-row label { font-size: 11px; color: var(--text-muted); font-weight: 600;
+            text-transform: uppercase; display: block; margin-bottom: 4px; margin-top: 8px; }
+        .fm-item-row label:first-child { margin-top: 0; }
+
+        .fm-item-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .fm-item-remove {
+            position: absolute; top: 8px; right: 8px;
+            background: none; border: none; color: #dc3545;
+            font-size: 16px; cursor: pointer; padding: 2px;
+        }
+
+        /* Add button */
+        .fm-add-btn {
+            width: 100%; padding: 10px; background: none;
+            border: 1px dashed var(--border); border-radius: 8px;
+            color: var(--text-muted); font-size: 13px; font-weight: 500;
+            cursor: pointer; margin-top: 4px;
+        }
+
+        /* Total line */
+        .fm-total-line {
+            display: flex; justify-content: flex-end; align-items: center;
+            gap: 6px; padding-top: 10px; margin-top: 4px;
+            border-top: 1px solid var(--border);
+            font-size: 15px; font-weight: 700; color: var(--text-primary);
+        }
+
+        /* Summary cards */
+        .fm-summary-cards {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+            margin-bottom: 14px;
+        }
+        .fm-summary-card { border-radius: 8px; padding: 10px 12px; }
+        .fm-summary-card .label { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .fm-summary-card .value { font-size: 18px; font-weight: 700; }
+        .fm-summary-card.blue { background: rgba(33,150,243,0.08); border: 1px solid rgba(33,150,243,0.2); }
+        .fm-summary-card.blue .label { color: #1976d2; }
+        .fm-summary-card.blue .value { color: #1565c0; }
+        .fm-summary-card.green { background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.2); }
+        .fm-summary-card.green .label { color: #388e3c; }
+        .fm-summary-card.green .value { color: #2e7d32; }
+        .fm-summary-card.red { background: rgba(244,67,54,0.08); border: 1px solid rgba(244,67,54,0.2); }
+        .fm-summary-card.red .label { color: #d32f2f; }
+        .fm-summary-card.red .value { color: #c62828; }
+
+        /* Payment rows */
+        .fm-payment-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0; border-bottom: 1px solid var(--border);
+        }
+        .fm-payment-row:last-child { border-bottom: none; }
+        .fm-payment-row label { display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: var(--text-primary); flex: 1; cursor: pointer; }
+        .fm-payment-row input[type="number"] {
+            width: 110px; padding: 7px 10px; font-size: 13px;
+            border: 1px solid var(--border); border-radius: 7px;
+            background: var(--bg); color: var(--text-primary); text-align: right;
+        }
+
+        /* Options */
+        .fm-option-row {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 0; font-size: 13px; color: var(--text-primary);
+        }
+        .fm-option-row input[type="checkbox"] { width: 17px; height: 17px; flex-shrink: 0; }
+
+        textarea.fm-textarea {
+            width: 100%; padding: 10px; font-size: 13px;
+            border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); color: var(--text-primary);
+            resize: vertical; box-sizing: border-box; margin-top: 4px;
+        }
+
+        /* Submit */
+        .fm-footer {
+            padding: 14px; position: sticky; bottom: 0;
+            background: var(--bg); border-top: 1px solid var(--border);
+        }
+        .fm-submit {
+            width: 100%; padding: 14px; background: #2563eb; color: white;
+            border: none; border-radius: 10px; font-size: 16px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .fm-submit:active { opacity: 0.85; }
+
+        /* Autocomplete */
+        .fm-autocomplete { position: relative; }
+        .fm-autocomplete-list {
+            display: none; position: absolute; top: 100%; left: 0; right: 0;
+            z-index: 9999; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 0 0 8px 8px; margin: 0; padding: 0; list-style: none;
+            box-shadow: 0 4px 12px var(--shadow); max-height: 200px; overflow-y: auto;
+            font-size: 13px;
+        }
+        .fm-autocomplete-list li {
+            padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--border);
+        }
+        .fm-autocomplete-list li:last-child { border-bottom: none; }
+        .fm-autocomplete-list li:hover { background: var(--bg2); }
+    </style>
+</head>
+<body>
+    {% if messages %}
+    <div style="padding: 10px 14px; background: #fef3c7; border-bottom: 1px solid #f59e0b;">
+        {% for msg in messages %}
+        <div style="font-size: 13px; color: #92400e;">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="fm-header">
+        <a href="{% url 'agenda' %}"><i class="fas fa-arrow-left"></i></a>
+        <h1>Fechar Atendimento</h1>
+    </div>
+
+    <form method="POST" id="fm-form">
+        {% csrf_token %}
+        <div class="fm-body">
+
+            <!-- Cliente -->
+            <div class="fm-card">
+                <div class="fm-card-header"><i class="fas fa-user" style="margin-right:6px;color:var(--accent1);"></i>{{ agendamento.cliente.nome|default:"Cliente" }}</div>
+                <div class="fm-card-body">
+                    <div class="fm-info-row">
+                        <span>Telefone</span>
+                        <span>{{ agendamento.cliente.telefone1|default:"—" }}</span>
+                    </div>
+                    <div class="fm-info-row">
+                        <span>Cliente desde</span>
+                        <span>{{ cliente_desde|default:"—" }}</span>
+                    </div>
+                    {% if ultima_visita %}
+                    <div class="fm-info-row">
+                        <span>Última visita</span>
+                        <span>{{ ultima_visita }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="fm-info-row">
+                        <span>Agendado para</span>
+                        <span>{{ agendamento.data_horario|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Itens -->
+            <div class="fm-card">
+                <div class="fm-card-header">Itens do Atendimento</div>
+                <div class="fm-card-body">
+                    <div class="fm-tabs">
+                        <button type="button" class="fm-tab active" data-tab="servicos">
+                            <i class="fas fa-cut"></i> Serviços
+                        </button>
+                        <button type="button" class="fm-tab" data-tab="produtos">
+                            <i class="fas fa-shopping-bag"></i> Produtos
+                        </button>
+                    </div>
+
+                    <!-- Serviços -->
+                    <div id="fm-tab-servicos">
+                        <div id="fm-servicos-container">
+                            <div class="fm-item-row" data-index="0">
+                                <button type="button" class="fm-item-remove" style="opacity:0.3;" disabled>
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                                <label>Tipo</label>
+                                <select name="servico_tipo_0">
+                                    <option value="" disabled selected>Selecionar...</option>
+                                    <option value="Corte">Corte</option>
+                                    <option value="Coloração">Coloração</option>
+                                    <option value="Camuflagem Gloss">Camuflagem Gloss</option>
+                                    <option value="Luzes">Luzes</option>
+                                    <option value="Relaxamento">Relaxamento</option>
+                                    <option value="Manicure">Manicure</option>
+                                    <option value="Pedicure">Pedicure</option>
+                                    <option value="Pedicure e Manicure">Pedicure e Manicure</option>
+                                    <option value="Alisamento">Alisamento</option>
+                                    <option value="Penteado">Penteado</option>
+                                    <option value="Escova">Escova</option>
+                                    <option value="Tratamento Capilar">Tratamento Capilar</option>
+                                    <option value="Sobrancelha e Buço">Sobrancelha e Buço</option>
+                                    <option value="Maquiagem">Maquiagem</option>
+                                    <option value="Sobrancelha">Sobrancelha</option>
+                                    <option value="Outro">Não especificado</option>
+                                </select>
+                                <label>Descrição</label>
+                                <input type="text" name="servico_0" placeholder="Ex: Corte feminino">
+                                <div class="fm-item-row-2col" style="margin-top:8px;">
+                                    <div>
+                                        <label>Valor (R$)</label>
+                                        <input type="number" name="valor_servico_0" class="val-servico" min="0" step="0.01" placeholder="0,00">
+                                    </div>
+                                    <div>
+                                        <label>Desconto (R$)</label>
+                                        <input type="number" name="desconto_servico_0" class="desc-servico" min="0" step="0.01" placeholder="0,00" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="fm-add-servico" class="fm-add-btn">
+                            <i class="fas fa-plus"></i> Adicionar Serviço
+                        </button>
+                    </div>
+
+                    <!-- Produtos -->
+                    <div id="fm-tab-produtos" style="display:none;">
+                        <div id="fm-produtos-container">
+                            <div class="fm-item-row" data-index="0">
+                                <button type="button" class="fm-item-remove" style="opacity:0.3;" disabled>
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                                <label>Produto</label>
+                                <div class="fm-autocomplete">
+                                    <input type="text" class="fm-produto-search" placeholder="Buscar produto..." autocomplete="off">
+                                    <input type="hidden" name="produto_0" class="fm-produto-hidden">
+                                    <ul class="fm-autocomplete-list"></ul>
+                                </div>
+                                <div class="fm-item-row-2col" style="margin-top:8px;">
+                                    <div>
+                                        <label>Qtd</label>
+                                        <input type="number" name="qtd_produto_0" class="fm-qtd-produto" min="1" step="1" value="1" placeholder="1">
+                                    </div>
+                                    <div>
+                                        <label>Valor Unit. (R$)</label>
+                                        <input type="number" name="valor_produto_0" class="fm-val-produto" min="0" step="0.01" placeholder="0,00" readonly style="background:var(--bg2);">
+                                    </div>
+                                </div>
+                                <div style="margin-top:8px;">
+                                    <label>Desconto (R$)</label>
+                                    <input type="number" name="desconto_produto_0" class="fm-desc-produto" min="0" step="0.01" placeholder="0,00" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="fm-add-produto" class="fm-add-btn">
+                            <i class="fas fa-plus"></i> Adicionar Produto
+                        </button>
+                    </div>
+
+                    <div class="fm-total-line">
+                        <span>Total dos Itens:</span>
+                        <span>R$ <span id="fm-total">0,00</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo Financeiro -->
+            <div class="fm-card">
+                <div class="fm-card-header">Resumo Financeiro</div>
+                <div class="fm-card-body">
+                    <div class="fm-summary-cards">
+                        <div class="fm-summary-card blue">
+                            <div class="label">Total</div>
+                            <div class="value">R$ <span id="fm-resumo-total">0,00</span></div>
+                        </div>
+                        <div class="fm-summary-card green">
+                            <div class="label">Recebido</div>
+                            <div class="value">R$ <span id="fm-resumo-recebido">0,00</span></div>
+                        </div>
+                        <div class="fm-summary-card red">
+                            <div class="label">Falta</div>
+                            <div class="value">R$ <span id="fm-resumo-falta">0,00</span></div>
+                        </div>
+                    </div>
+
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Forma de Pagamento</div>
+                    <div id="fm-payment-list">
+                        {% for forma_val, forma_label in formas_pagamento %}
+                        <div class="fm-payment-row">
+                            <label>
+                                <input type="checkbox" name="forma_pagamento" value="{{ forma_val }}" class="fm-chk-forma">
+                                {{ forma_label }}
+                            </label>
+                            <input type="number" name="valor_forma_{{ forma_val }}" class="fm-input-forma" data-forma="{{ forma_val }}"
+                                min="0" step="0.01" placeholder="R$ 0,00" disabled style="opacity:0.4;">
+                        </div>
+                        {% endfor %}
+                        <div class="fm-option-row">
+                            <input type="checkbox" name="deixar_divida" id="fm-divida">
+                            <label for="fm-divida">Deixar o que falta como dívida</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agendamento automático -->
+            <div class="fm-card">
+                <div class="fm-card-header"><i class="fas fa-redo-alt" style="margin-right:6px;color:var(--accent1);"></i>Reagendamento Automático</div>
+                <div class="fm-card-body">
+                    <div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Selecione em quantos dias agendar o próximo atendimento</div>
+                        <div style="display:flex;gap:6px;margin-bottom:7px;">
+                            <button type="button" class="fm-btn-reagendar" data-dias="15" style="flex:1;padding:8px 4px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;">15 dias</button>
+                            <button type="button" class="fm-btn-reagendar" data-dias="30" style="flex:1;padding:8px 4px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;">30 dias</button>
+                            <button type="button" class="fm-btn-reagendar" data-dias="90" style="flex:1;padding:8px 4px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;">90 dias</button>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" id="fm-reagendar-custom" min="1" max="365" placeholder="Ou digite os dias" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;background:var(--bg);color:var(--text-primary);">
+                            <span style="font-size:12px;color:var(--text-muted);white-space:nowrap;">dias</span>
+                        </div>
+                        <input type="hidden" name="reagendar_dias" id="fm-reagendar-dias" value="">
+                        <div id="fm-reagendar-info" style="display:none;margin-top:7px;padding:7px 10px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.2);border-radius:6px;font-size:12px;color:#2563eb;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.fm-body -->
+
+        <div class="fm-footer">
+            <button type="submit" class="fm-submit">
+                <i class="fas fa-check-circle"></i> Fechar Conta
+            </button>
+        </div>
+    </form>
+
+    <script>
+    const produtosEstoque = {{ produtos_estoque_json|safe }};
+    let servicoIndex = 1;
+    let produtoIndex = 1;
+
+    // ----- Tabs -----
+    document.querySelectorAll('.fm-tab').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.fm-tab').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const tab = this.dataset.tab;
+            document.getElementById('fm-tab-servicos').style.display = tab === 'servicos' ? 'block' : 'none';
+            document.getElementById('fm-tab-produtos').style.display = tab === 'produtos' ? 'block' : 'none';
+        });
+    });
+
+    // ----- Total -----
+    function calcularTotal() {
+        let total = 0;
+        document.querySelectorAll('.val-servico').forEach((inp, i) => {
+            const v = parseFloat(inp.value) || 0;
+            const d = parseFloat(document.querySelectorAll('.desc-servico')[i]?.value) || 0;
+            total += Math.max(0, v - d);
+        });
+        document.querySelectorAll('.fm-val-produto').forEach((inp, i) => {
+            const v = parseFloat(inp.value) || 0;
+            const q = parseFloat(document.querySelectorAll('.fm-qtd-produto')[i]?.value) || 1;
+            const d = parseFloat(document.querySelectorAll('.fm-desc-produto')[i]?.value) || 0;
+            total += Math.max(0, (v * q) - d);
+        });
+        document.getElementById('fm-total').textContent = total.toFixed(2).replace('.', ',');
+        document.getElementById('fm-resumo-total').textContent = total.toFixed(2).replace('.', ',');
+        calcularResumo(total);
+    }
+
+    function calcularResumo(total) {
+        let recebido = 0;
+        document.querySelectorAll('.fm-input-forma').forEach(inp => {
+            if (!inp.disabled) recebido += parseFloat(inp.value) || 0;
+        });
+        const falta = Math.max(0, total - recebido);
+        document.getElementById('fm-resumo-recebido').textContent = recebido.toFixed(2).replace('.', ',');
+        document.getElementById('fm-resumo-falta').textContent = falta.toFixed(2).replace('.', ',');
+    }
+
+    document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('val-servico') ||
+            e.target.classList.contains('desc-servico') ||
+            e.target.classList.contains('fm-val-produto') ||
+            e.target.classList.contains('fm-qtd-produto') ||
+            e.target.classList.contains('fm-desc-produto') ||
+            e.target.classList.contains('fm-input-forma')) {
+            calcularTotal();
+        }
+    });
+
+    // ----- Pagamento checkboxes -----
+    document.querySelectorAll('.fm-chk-forma').forEach(chk => {
+        chk.addEventListener('change', function () {
+            const input = document.querySelector(`.fm-input-forma[data-forma="${this.value}"]`);
+            if (input) {
+                input.disabled = !this.checked;
+                input.style.opacity = this.checked ? '1' : '0.4';
+                if (!this.checked) input.value = '';
+                calcularTotal();
+            }
+        });
+    });
+
+    // ----- Add/Remove Serviço -----
+    function buildServicoRow(idx) {
+        return `<div class="fm-item-row" data-index="${idx}">
+            <button type="button" class="fm-item-remove"><i class="fas fa-times-circle"></i></button>
+            <label>Tipo</label>
+            <select name="servico_tipo_${idx}">
+                <option value="" disabled selected>Selecionar...</option>
+                <option value="Corte">Corte</option>
+                <option value="Coloração">Coloração</option>
+                <option value="Camuflagem Gloss">Camuflagem Gloss</option>
+                <option value="Luzes">Luzes</option>
+                <option value="Relaxamento">Relaxamento</option>
+                <option value="Manicure">Manicure</option>
+                <option value="Pedicure">Pedicure</option>
+                <option value="Pedicure e Manicure">Pedicure e Manicure</option>
+                <option value="Alisamento">Alisamento</option>
+                <option value="Penteado">Penteado</option>
+                <option value="Escova">Escova</option>
+                <option value="Tratamento Capilar">Tratamento Capilar</option>
+                <option value="Sobrancelha e Buço">Sobrancelha e Buço</option>
+                <option value="Maquiagem">Maquiagem</option>
+                <option value="Sobrancelha">Sobrancelha</option>
+                <option value="Outro">Não especificado</option>
+            </select>
+            <label>Descrição</label>
+            <input type="text" name="servico_${idx}" placeholder="Ex: Corte feminino">
+            <div class="fm-item-row-2col" style="margin-top:8px;">
+                <div><label>Valor (R$)</label><input type="number" name="valor_servico_${idx}" class="val-servico" min="0" step="0.01" placeholder="0,00"></div>
+                <div><label>Desconto (R$)</label><input type="number" name="desconto_servico_${idx}" class="desc-servico" min="0" step="0.01" placeholder="0,00" value="0"></div>
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('fm-add-servico').addEventListener('click', function () {
+        const container = document.getElementById('fm-servicos-container');
+        container.insertAdjacentHTML('beforeend', buildServicoRow(servicoIndex++));
+    });
+
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.fm-item-remove');
+        if (!btn || btn.disabled) return;
+        btn.closest('.fm-item-row').remove();
+        calcularTotal();
+    });
+
+    // ----- Add/Remove Produto -----
+    function buildProdutoRow(idx) {
+        return `<div class="fm-item-row" data-index="${idx}">
+            <button type="button" class="fm-item-remove"><i class="fas fa-times-circle"></i></button>
+            <label>Produto</label>
+            <div class="fm-autocomplete">
+                <input type="text" class="fm-produto-search" placeholder="Buscar produto..." autocomplete="off">
+                <input type="hidden" name="produto_${idx}" class="fm-produto-hidden">
+                <ul class="fm-autocomplete-list"></ul>
+            </div>
+            <div class="fm-item-row-2col" style="margin-top:8px;">
+                <div><label>Qtd</label><input type="number" name="qtd_produto_${idx}" class="fm-qtd-produto" min="1" step="1" value="1" placeholder="1"></div>
+                <div><label>Valor Unit. (R$)</label><input type="number" name="valor_produto_${idx}" class="fm-val-produto" min="0" step="0.01" placeholder="0,00" readonly style="background:var(--bg2);"></div>
+            </div>
+            <div style="margin-top:8px;">
+                <label>Desconto (R$)</label>
+                <input type="number" name="desconto_produto_${idx}" class="fm-desc-produto" min="0" step="0.01" placeholder="0,00" value="0">
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('fm-add-produto').addEventListener('click', function () {
+        const container = document.getElementById('fm-produtos-container');
+        container.insertAdjacentHTML('beforeend', buildProdutoRow(produtoIndex++));
+    });
+
+    // ----- Product Autocomplete -----
+    document.addEventListener('input', function (e) {
+        if (!e.target.classList.contains('fm-produto-search')) return;
+        const query = e.target.value.toLowerCase().trim();
+        const row = e.target.closest('.fm-item-row');
+        const list = row.querySelector('.fm-autocomplete-list');
+        const hidden = row.querySelector('.fm-produto-hidden');
+        if (!query) { list.style.display = 'none'; hidden.value = ''; return; }
+        const matches = produtosEstoque.filter(p => p.nome.toLowerCase().includes(query)).slice(0, 8);
+        if (!matches.length) { list.style.display = 'none'; return; }
+        list.innerHTML = matches.map(p => `<li data-nome="${p.nome}" data-preco="${p.preco}">${p.nome} — R$ ${parseFloat(p.preco).toFixed(2)}</li>`).join('');
+        list.style.display = 'block';
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target.tagName === 'LI' && e.target.closest('.fm-autocomplete-list')) {
+            const li = e.target;
+            const row = li.closest('.fm-item-row');
+            row.querySelector('.fm-produto-search').value = li.dataset.nome;
+            row.querySelector('.fm-produto-hidden').value = li.dataset.nome;
+            row.querySelector('.fm-val-produto').value = li.dataset.preco;
+            li.closest('.fm-autocomplete-list').style.display = 'none';
+            calcularTotal();
+        }
+        if (!e.target.classList.contains('fm-produto-search')) {
+            document.querySelectorAll('.fm-autocomplete-list').forEach(l => l.style.display = 'none');
+        }
+    });
+
+    // ----- Reagendamento Automático -----
+    (function () {
+        const btns = document.querySelectorAll('.fm-btn-reagendar');
+        const inputDias = document.getElementById('fm-reagendar-dias');
+        const inputCustom = document.getElementById('fm-reagendar-custom');
+        const infoBox = document.getElementById('fm-reagendar-info');
+
+        function mostrarInfo(dias) {
+            const d = new Date();
+            d.setDate(d.getDate() + parseInt(dias));
+            infoBox.textContent = `Próximo agendamento em ${dias} dias (aprox. ${d.toLocaleDateString('pt-BR')})`;
+            infoBox.style.display = 'block';
+        }
+
+        function resetarBotoes() {
+            btns.forEach(b => {
+                b.style.background = 'var(--bg)';
+                b.style.color = 'var(--text-muted)';
+                b.style.borderColor = 'var(--border)';
+            });
+        }
+
+        btns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const dias = this.dataset.dias;
+                if (inputDias.value === dias) {
+                    inputDias.value = '';
+                    infoBox.style.display = 'none';
+                    resetarBotoes();
+                    return;
+                }
+                inputDias.value = dias;
+                inputCustom.value = '';
+                resetarBotoes();
+                this.style.background = 'rgba(37,99,235,0.1)';
+                this.style.color = '#2563eb';
+                this.style.borderColor = 'rgba(37,99,235,0.4)';
+                mostrarInfo(dias);
+            });
+        });
+
+        inputCustom.addEventListener('input', function () {
+            const dias = parseInt(this.value);
+            resetarBotoes();
+            if (!dias || dias < 1) {
+                inputDias.value = '';
+                infoBox.style.display = 'none';
+                return;
+            }
+            inputDias.value = dias;
+            mostrarInfo(dias);
+        });
+    })();
+
+    // ----- Submit validation -----
+    document.getElementById('fm-form').addEventListener('submit', function (e) {
+        const temServico = [...document.querySelectorAll('#fm-servicos-container input[name^="servico_"]')]
+            .some(i => i.value.trim());
+        const temProduto = [...document.querySelectorAll('#fm-produtos-container .fm-produto-hidden')]
+            .some(i => i.value.trim());
+        if (!temServico && !temProduto) {
+            e.preventDefault();
+            alert('Informe ao menos um serviço ou produto para fechar o atendimento.');
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+name: banco_agenda
+
+services:
+
+  agenda_db:
+    image: mongo:latest
+    container_name: agenda_db
+    command: ["mongod", "--auth"]
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=agenda
+      - MONGO_INITDB_ROOT_PASSWORD=rivotril20mg
+      - MONGO_DB=agenda_db
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
+    ports:
+      - "27000:27017"
+    networks:
+      - app-network
+    volumes:
+      - agenda_data:/data/db
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  agenda_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/fernando/repositorio/volume_data/agenda

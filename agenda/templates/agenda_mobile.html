@@ -1,0 +1,659 @@
+{% load static %}
+{% load agenda_extras %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9XEX74XP2Q"></script>
+    <script src="{% static 'gtag.js' %}" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/x-icon" href="{% static 'index/img/favicon.ico' %}">
+    <title>Agenda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <script src="{% static 'theme.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'agenda/css/agenda.css' %}?v=7">
+    <style>
+        /* ── Mobile layout overrides (cores herdadas do agenda.css) ── */
+
+        /* Reset body flex for mobile */
+        body {
+            display: block;
+            overflow-x: hidden;
+        }
+
+        /* Mobile header – uses existing CSS vars */
+        .header {
+            position: sticky;
+            height: 60px;
+            padding: 0 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-bottom: 1px solid var(--glass-border);
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-img {
+            height: 36px;
+        }
+
+        /* Hide sidebar nav, use bottom nav */
+        .nav-buttons {
+            display: none !important;
+        }
+
+        /* Content wrapper – full width on mobile */
+        .content-wrapper {
+            margin-left: 0 !important;
+            width: 100% !important;
+            padding: 10px !important;
+            padding-bottom: 72px !important;
+        }
+
+        .page-container {
+            margin-top: 0;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Calendar container */
+        .calendar-container {
+            height: auto;
+            border-radius: 12px;
+        }
+
+        /* Cal header – stack on mobile */
+        .cal-header {
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 12px;
+        }
+
+        .cal-header-left {
+            gap: 10px;
+        }
+
+        .cal-header-left h2 {
+            font-size: 0.9rem;
+        }
+
+        .cal-header-right {
+            gap: 8px;
+        }
+
+        .btn-today {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        .btn-new-event {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        /* View selector */
+        .view-selector {
+            padding: 2px;
+        }
+
+        .view-btn {
+            padding: 4px 10px;
+            font-size: 0.72rem;
+        }
+
+        /* Week view */
+        .cal-week-view {
+            overflow-x: auto;
+        }
+
+        .week-header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .day-col-header {
+            padding: 6px 0;
+        }
+
+        .day-name {
+            font-size: 0.6rem;
+        }
+
+        .day-num {
+            font-size: 0.9rem;
+        }
+
+        .day-col-header.today .day-num {
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            font-size: 0.75rem;
+        }
+
+        .time-gutter {
+            width: 40px;
+        }
+
+        .time-labels {
+            width: 40px;
+        }
+
+        .time-label {
+            font-size: 0.58rem;
+            padding-right: 4px;
+        }
+
+        /* Event cards */
+        .event-card {
+            padding: 3px 5px;
+            font-size: 0.65rem;
+            left: 2px;
+            right: 2px;
+        }
+
+        .event-title {
+            font-size: 0.63rem;
+        }
+
+        /* ── Bottom Navigation ── */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+            border-top: 1px solid var(--glass-border);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            font-weight: 500;
+            padding: 4px 6px;
+            transition: color .2s;
+        }
+
+        .mobile-bottom-nav a i {
+            font-size: 16px;
+        }
+
+        .mobile-bottom-nav a.active {
+            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(223, 166, 88, 0.2), rgba(157, 100, 245, 0.25));
+            border-radius: 14px;
+            padding: 6px 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .mobile-bottom-nav a.nav-logout-mobile {
+            color: #c0392b;
+        }
+
+        /* ── Modal: bottom sheet via base.css — ajustes específicos da agenda ── */
+        .modal-header h2 {
+            font-size: 1rem;
+        }
+
+        /* Form tweaks */
+        .form-row {
+            flex-direction: column;
+        }
+
+        .form-row .form-group {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body data-current-date="{{ current_date|date:"d-m-Y" }}" data-view-type="{{ view_type }}" data-produtos='{{ produtos_json|default:"[]"|safe }}'>
+    <!-- Header (reusa classes do desktop) -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <img src="{% static 'home/img/logo.png' %}" alt="Logo" class="logo-img">
+            </div>
+        </div>
+        <div class="header-right">
+            {% if google_conectado %}
+            <a href="{% url 'socialaccount_connections' %}" class="header-google header-google-on" title="Google Calendar conectado">
+                <i class="fab fa-google"></i>
+            </a>
+            {% else %}
+            <a href="{% provider_login_url 'google' process='connect' %}" class="header-google" title="Conectar ao Google Calendar">
+                <i class="fab fa-google"></i>
+            </a>
+            {% endif %}
+            <form method="post" action="{% url 'account_logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="header-logout" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Page Container -->
+    <div class="page-container">
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <main class="main-content">
+                <div class="page-header" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 32px var(--shadow);">
+                    <div style="position: absolute; right: -10px; top: -20px; font-size: 90px; color: var(--accent2); opacity: 0.05; pointer-events: none;">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                    <div style="position: relative; z-index: 1;">
+                        <h1 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px;">
+                            <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                            Agenda de Atendimentos
+                        </h1>
+                        <p style="margin: 4px 0 0 48px; color: var(--text-muted); font-size: 0.8rem;">Controle e gerencie todos os compromissos do seu salão.</p>
+                    </div>
+                </div>
+
+                <!-- Messages Display -->
+                {% if messages %}
+                <div class="messages-container" style="margin: 1rem 0;">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message.message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Calendar Interface -->
+                <div class="calendar-container">
+                    <main class="calendar-main" style="width: 100%;">
+                        <header class="cal-header">
+                            <div class="cal-header-left">
+                                <a href="?data={% now 'd-m-Y' %}&view={{ view_type }}"
+                                    class="btn-today">Hoje</a>
+                                <div class="cal-nav-arrows">
+                                    <a href="?data={{ prev_week|date:'d-m-Y' }}&view={{ view_type }}" class="icon-btn"
+                                        title="{% if view_type == 'dia' %}Dia Anterior{% else %}Semana Anterior{% endif %}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                    <a href="?data={{ next_week|date:'d-m-Y' }}&view={{ view_type }}" class="icon-btn"
+                                        title="{% if view_type == 'dia' %}Próximo Dia{% else %}Próxima Semana{% endif %}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                                <h2>
+                                    {% if view_type == 'dia' %}
+                                        {{ current_date|date:"d \d\e F" }}
+                                    {% else %}
+                                        {{ start_of_week|date:"d" }} – {{ end_of_week|date:"d \d\e F Y" }}
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <div class="cal-header-right">
+                                <div class="view-selector">
+                                    <a href="?data={{ current_date|date:'d-m-Y' }}&view=dia"
+                                        class="view-btn {% if view_type == 'dia' %}active{% endif %}">Dia</a>
+                                    <a href="?data={{ current_date|date:'d-m-Y' }}&view=semana"
+                                        class="view-btn {% if view_type == 'semana' %}active{% endif %}">Semana</a>
+                                </div>
+                                {% if google_conectado %}
+                                <button class="btn-today" id="btn-sincronizar-google" type="button" title="Sincronizar com o Google">
+                                    <i class="fas fa-rotate"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn-new-event" id="btn-new-appointment">
+                                    <i class="fas fa-plus"></i> Novo
+                                </button>
+                            </div>
+                        </header>
+
+                        <!-- Visualização Semanal/Diária -->
+                        <div class="cal-week-view">
+                            <!-- Header Row (Days) -->
+                            <div class="week-header">
+                                <div class="time-gutter"></div>
+                                {% for day in week_days %}
+                                <div class="day-col-header {% if day.is_today %}today{% endif %}">
+                                    <span class="day-name">{{ day.day_name }}</span>
+                                    <span class="day-num">{{ day.day_num }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Scrollable Grid -->
+                            <div class="week-grid-scroll">
+                                <div class="week-grid">
+                                    <!-- Time Labels Column -->
+                                    <div class="time-labels">
+                                        {% for hour in hours_list %}
+                                        <div class="time-label">{{ hour }}</div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Column Lines (Grid) -->
+                                    <div class="day-columns">
+                                        {% for day in week_days %}
+                                        <div class="day-column {% if day.is_today %}today-bg{% endif %}">
+                                            {% with day_str=day.date|date:"Y-m-d" %}
+                                            {% with day_schedule=schedule|get_item:day_str %}
+                                            {% for hour in hours_list %}
+                                            {% with appointments=day_schedule|get_item:hour %}
+                                            {% if appointments %}
+                                            {% for appt in appointments %}
+                                            <div class="event-card event-card-clickable{% if appt.finalizado %} event-finalizado{% elif appt.status == 'Aguardando' %} status-aguardando{% elif appt.status == 'Em Atendimento' %} status-em-atendimento{% endif %}"
+                                                data-id="{{ appt.id }}"
+                                                data-status="{{ appt.status }}"
+                                                style="top: {{ appt.data_horario|get_event_top }}px; height: {{ appt.duracao }}px; border-left: 4px solid {% if appt.finalizado %}#4caf50{% else %}{{ appt.cor }}{% endif %}; {% if appt.finalizado %}opacity: 0.75; background: rgba(76,175,80,0.12);{% endif %}">
+                                                <!-- NAO MEXE AQUI -->
+                                                <span class="event-title">
+                                                    {% if appt.finalizado %}<i class="fas fa-check-circle"
+                                                        style="color:#4caf50;margin-right:3px;"></i>{% endif %} {{ appt.data_horario|date:"H:i" }} - {{ appt.cliente_nome }}
+                                                </span>
+                                                {% if appt.observacoes %}
+                                                <span class="event-obs">{{ appt.observacoes }}</span>
+                                                {% endif %}
+                                                <!-- NAO MEXE AQUI -->
+                                            </div>
+                                            {% endfor %}
+                                            {% endif %}
+                                            {% endwith %}
+                                            {% endfor %}
+                                            {% endwith %}
+                                            {% endwith %}
+                                        </div>
+                                        {% endfor %}
+
+                                        <!-- Grid Horizontal Lines -->
+                                        <div class="grid-lines">
+                                            {% for hour in hours_list %}
+                                            <div class="grid-line"></div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="{% url 'agenda' %}" class="active">
+            <i class="far fa-calendar"></i>
+        </a>
+        {% if user.is_staff %}
+        <a href="{% url 'profissionais' %}">
+            <i class="fas fa-users"></i>
+        </a>
+        {% endif %}
+    </nav>
+
+    <!-- Modal Novo Agendamento -->
+    <div id="modal-agendamento" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Novo Agendamento</h2>
+                <button class="close-modal" id="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="?data={{ current_date|date:'Y-m-d' }}">
+                    {% csrf_token %}
+                    <div class="form-group" style="position: relative;">
+                        <label for="cliente-search">Nome do Cliente *</label>
+                        <input type="text" name="cliente_nome" id="cliente-search" class="form-control"
+                            placeholder="Digite o nome do cliente..." autocomplete="off" required style="width: 100%;">
+                        <ul id="cliente-autocomplete-list" style="
+                            display: none;
+                            position: absolute;
+                            top: 100%;
+                            left: 0;
+                            right: 0;
+                            z-index: 9999;
+                            background: var(--bg);
+                            border: 1px solid var(--border);
+                            border-radius: 0 0 8px 8px;
+                            margin: 0;
+                            padding: 0;
+                            list-style: none;
+                            max-height: 220px;
+                            overflow-y: auto;
+                        "></ul>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-telefone">Telefone</label>
+                        <input type="text" name="cliente_telefone" id="cliente-telefone" class="form-control" placeholder="(00) 00000-0000">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.data_horario.id_for_label }}">Data e Horário *</label>
+                            {{ form.data_horario }}
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.duracao.id_for_label }}">Duração (min) *</label>
+                            {{ form.duracao }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.observacoes.id_for_label }}">Observações <small id="obs-counter" style="color: var(--text-muted); font-weight: normal;">0/70</small></label>
+                        {{ form.observacoes }}
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="btn-cancel-modal">Cancelar</button>
+                        <button type="submit" class="btn-save">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Agendamento -->
+    <div id="modal-editar-agendamento" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Agendamento</h2>
+                <button class="close-modal" id="btn-close-modal-editar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" id="form-editar-agendamento">
+                    {% csrf_token %}
+                    <input type="hidden" name="redirect_data" value="{{ current_date|date:'d-m-Y' }}">
+                    <input type="hidden" name="redirect_view" value="{{ view_type }}">
+
+                    <div class="form-group" style="position: relative;">
+                        <label for="edit_cliente_search">Nome do Cliente *</label>
+                        <input type="text" name="cliente_nome" id="edit_cliente_search" class="form-control"
+                            placeholder="Digite o nome do cliente..." autocomplete="off" required style="width: 100%;">
+                        <ul id="edit-cliente-autocomplete-list" style="
+                            display: none;
+                            position: absolute;
+                            top: 100%;
+                            left: 0;
+                            right: 0;
+                            z-index: 9999;
+                            background: var(--bg);
+                            border: 1px solid var(--border);
+                            border-radius: 0 0 8px 8px;
+                            margin: 0;
+                            padding: 0;
+                            list-style: none;
+                            max-height: 220px;
+                            overflow-y: auto;
+                        "></ul>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_cliente_telefone">Telefone</label>
+                        <input type="text" name="cliente_telefone" id="edit_cliente_telefone" class="form-control" placeholder="(00) 00000-0000">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="edit_data_horario">Data e Horário *</label>
+                            <input type="datetime-local" name="data_horario" id="edit_data_horario" class="form-control"
+                                required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="edit_duracao">Duração (min) *</label>
+                            <input type="number" name="duracao" id="edit_duracao" class="form-control" min="15"
+                                step="15" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_observacoes">Observações <small id="edit-obs-counter" style="color: var(--text-muted); font-weight: normal;">0/70</small></label>
+                        <textarea name="observacoes" id="edit_observacoes" class="form-control" rows="3" maxlength="70"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-delete" id="btn-delete-agendamento">Excluir</button>
+                        <div style="flex: 1;"></div>
+                        <button type="button" class="btn-cancel" id="btn-cancel-modal-editar">Cancelar</button>
+                        <button type="submit" class="btn-save">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Finalizar Atendimento removido — substituído por página dedicada (/agenda/finalizar-mobile/<id>/) -->
+
+    <!-- Modal Detalhes do Agendamento -->
+    <style>
+    .btn-detalhes {
+        padding: 12px; border-radius: 6px; font-weight: 600; font-size: 12px; letter-spacing: 0.5px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+        transition: all 0.2s ease;
+    }
+    .btn-detalhes-secondary {
+        background: rgba(7, 45, 161, 0.08);
+        color: #072da1;
+        border: 1px solid rgba(7, 45, 161, 0.25);
+    }
+    .btn-detalhes-secondary:hover {
+        background: rgba(7, 45, 161, 0.15);
+        border-color: #072da1;
+        color: #051f73;
+    }
+    .btn-detalhes-danger {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    .btn-detalhes-danger:hover {
+        background: rgba(220, 38, 38, 0.18);
+        color: #b91c1c;
+    }
+    .btn-detalhes-status {
+        background: var(--bg);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        justify-content: space-between;
+    }
+    .btn-detalhes-status:hover {
+        border-color: #ca8a04;
+        color: #ca8a04;
+    }
+    .btn-detalhes-status.ativo {
+        background: rgba(234, 179, 8, 0.12);
+        color: #ca8a04;
+        border-color: rgba(234, 179, 8, 0.5);
+    }
+</style>
+    <div id="modal-visualizar-atendimento" class="modal-overlay">
+        <div class="modal-content" style="max-width: 480px; padding: 0; background: var(--bg);">
+            <div class="modal-header" style="padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg);">
+                <h2 style="font-size: 20px; font-weight: 700; color: var(--text-primary); margin: 0;">Detalhes</h2>
+            </div>
+
+            <div class="modal-body" style="padding: 24px;">
+                <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Informações -->
+                    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 14px;">
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span style="color: var(--text-muted); min-width: 110px;">Cliente:</span>
+                            <span style="color: var(--text-primary); font-weight: 600;" id="visualizar_cliente_nome"></span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span style="color: var(--text-muted); min-width: 110px;">Telefone:</span>
+                            <span style="color: var(--text-primary);" id="visualizar_telefone"></span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span style="color: var(--text-muted); min-width: 110px;">Data/Hora:</span>
+                            <span style="color: var(--text-primary);" id="visualizar_data_horario_display"></span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <span style="color: var(--text-muted); min-width: 110px;">Duração:</span>
+                            <span style="color: var(--text-primary);" id="visualizar_duracao"></span>
+                        </div>
+                        <div id="visualizar_observacoes_row" style="display: none; align-items: flex-start; gap: 8px;">
+                            <span style="color: var(--text-muted); min-width: 110px;">Obs:</span>
+                            <span style="color: var(--text-primary); font-style: italic;" id="visualizar_observacoes"></span>
+                        </div>
+                    </div>
+
+                    <!-- Ações -->
+                    <div id="detalhes_acoes_container" style="border-top: 1px solid var(--border); padding-top: 20px;">
+                        <div id="detalhes_acoes_botoes" style="display: flex; flex-direction: column; gap: 10px;">
+                            <button id="btn-details-status" class="btn-detalhes btn-detalhes-status">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span id="btn-details-status-label">COLOCAR EM ESPERA</span>
+                                </div>
+                            </button>
+                            <button id="btn-details-change-client" class="btn-detalhes btn-detalhes-secondary">
+                                <i class="fas fa-user-edit"></i> EDITAR AGENDAMENTO
+                            </button>
+                            <button id="btn-details-cancel" class="btn-detalhes btn-detalhes-danger">
+                                <i class="fas fa-ban"></i> CANCELAR AGENDAMENTO
+                            </button>
+                        </div>
+
+                        <!-- Conteúdo visível se ESTIVER finalizado -->
+                        <div id="detalhes_acoes_aviso" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 20px 0;">
+                            <div style="width: 48px; height: 48px; background: rgba(34, 160, 100, 0.1); color: #22a064; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--text-primary); margin: 0 0 4px 0; font-size: 15px; font-weight: 600;">Atendimento Finalizado</h4>
+                            </div>
+                            <div id="detalhes_servicos_realizados" style="width: 100%; text-align: left; margin-top: 4px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; background: var(--bg); border-radius: 0 0 8px 8px;">
+                <button id="btn-close-modal-visualizar" class="btn-detalhes btn-detalhes-secondary" style="padding: 10px 20px; font-size: 13px;">
+                    <i class="fas fa-times"></i> FECHAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'agenda/js/agenda.js' %}?v=3"></script>
+
+</body>
+
+</html>

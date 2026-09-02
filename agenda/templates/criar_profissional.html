@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{% static 'index/img/favicon.ico' %}">
+    <title>Novo profissional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <script src="{% static 'theme.js' %}" defer></script>
+    <style>
+        .prof-form { max-width: 440px; display: flex; flex-direction: column; gap: 16px; }
+
+        .prof-field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .prof-field input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        .prof-field input:focus { outline: none; border-color: var(--accent2-light); }
+
+        .prof-field .helptext { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+        .prof-field .errorlist { list-style: none; color: #dc2626; font-size: 0.78rem; margin-top: 4px; }
+
+        .prof-check { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-primary); }
+
+        .prof-form-actions { display: flex; gap: 12px; margin-top: 8px; }
+
+        .btn-save-prof {
+            padding: 10px 20px;
+            background: var(--accent2);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn-save-prof:hover { background: var(--accent2-light); }
+
+        .btn-cancel-prof {
+            padding: 10px 20px;
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <img src="{% static 'home/img/logo.png' %}" alt="Logo" class="logo-img">
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="header-user">
+                <i class="fas fa-user-circle"></i> {{ user.get_full_name|default:user.email }}
+            </span>
+            <form method="post" action="{% url 'account_logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="header-logout" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <nav class="nav-buttons">
+            <a href="{% url 'agenda' %}" class="nav-btn">
+                <i class="far fa-calendar"></i><span>Agenda</span>
+            </a>
+            <a href="{% url 'profissionais' %}" class="nav-btn active">
+                <i class="fas fa-users"></i><span>Profissionais</span>
+            </a>
+        </nav>
+
+        <div class="content-wrapper">
+            <main class="main-content">
+                <div class="page-header" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); margin-bottom: 24px;">
+                    <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin: 0;">Novo profissional</h1>
+                </div>
+
+                <div class="card">
+                    <form method="post" class="prof-form">
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                        <div class="prof-field">
+                            <label for="{{ form.username.id_for_label }}">Usuário</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                        <div class="prof-field">
+                            <label for="{{ form.first_name.id_for_label }}">Nome</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="prof-field">
+                            <label for="{{ form.email.id_for_label }}">E-mail</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                        <div class="prof-field">
+                            <label for="{{ form.password1.id_for_label }}">Senha</label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}<ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                        <div class="prof-field">
+                            <label for="{{ form.password2.id_for_label }}">Confirmar senha</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}<ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                        <label class="prof-check">
+                            <input type="checkbox" name="is_staff">
+                            Também pode gerenciar profissionais (administrador)
+                        </label>
+                        <div class="prof-form-actions">
+                            <button type="submit" class="btn-save-prof">Criar</button>
+                            <a href="{% url 'profissionais' %}" class="btn-cancel-prof">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>
