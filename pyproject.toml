@@ -1,16 +1,15 @@
 [project]
-name = "agenda-base"
+name = "agenda-google"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "django==6.0.1",
-    "django-allauth>=65.19.2",
+    "django-allauth[socialaccount]",
     "django-mongodb-backend==6.0.1",
-    "google-api-python-client>=2.200.0",
-    "google-auth>=2.57.0",
-    "google-auth-httplib2>=0.4.2",
+    "google-api-python-client",
+    "google-auth",
     "gunicorn==25.1.0",
     "pymongo==4.16.0",
     "python-dotenv==1.2.1",

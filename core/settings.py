@@ -36,7 +36,10 @@ CSP_DIRECTIVES = {
     "connect-src": ["'self'"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
-    "form-action": ["'self'"],
+    # 'self' não basta: o form de login social (allauth) redireciona para o
+    # provedor OAuth após o POST, e o Chromium aplica form-action também ao
+    # destino desse redirect, não só à action do <form>.
+    "form-action": ["'self'", "https://accounts.google.com"],
     "frame-ancestors": ["'none'"],
 }
 
@@ -130,7 +133,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "SCOPE": [
             "profile",
             "email",
-            "https://www.googleapis.com/auth/calendar.events",
+            "https://www.googleapis.com/auth/calendar.readonly",
         ],
         "AUTH_PARAMS": {
             "access_type": "offline",

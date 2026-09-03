@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="{% static 'index/img/favicon.ico' %}">
-    <title>Entrar — Agenda</title>
+    <title>{% if process == "connect" %}Conectar Google{% else %}Entrar com Google{% endif %} — Agenda</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static 'base.css' %}">
@@ -22,6 +22,7 @@
         .login-card {
             width: 100%;
             max-width: 360px;
+            text-align: center;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
@@ -35,53 +36,22 @@
             margin: 0 auto 24px;
         }
 
+        .login-card .google-icon {
+            font-size: 2rem;
+            color: var(--accent2);
+            margin-bottom: 16px;
+        }
+
         .login-card h1 {
             font-size: 1.15rem;
             color: var(--text-primary);
             margin-bottom: 8px;
-            text-align: center;
         }
 
         .login-card p.subtitle {
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-bottom: 24px;
-            text-align: center;
-        }
-
-        .login-field { margin-bottom: 16px; }
-
-        .login-field label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .login-field input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.9rem;
-            font-family: inherit;
-            background: var(--bg);
-            color: var(--text-primary);
-        }
-
-        .login-field input:focus {
-            outline: none;
-            border-color: var(--accent2-light);
-        }
-
-        .login-errors {
-            background: #fdecea;
-            color: #b3261e;
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            font-size: 0.8rem;
-            margin-bottom: 16px;
         }
 
         .btn-login {
@@ -107,28 +77,17 @@
             <div class="logo">
                 <img src="{% static 'home/img/logo.png' %}" alt="Logo" class="logo-img">
             </div>
-            <h1>Acesse sua agenda</h1>
-            <p class="subtitle">Entre com seu usuário e senha.</p>
-
-            {% if form.non_field_errors %}
-                <div class="login-errors">
-                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-                </div>
+            <div class="google-icon"><i class="fa-brands fa-google"></i></div>
+            {% if process == "connect" %}
+                <h1>Conectar Google</h1>
+                <p class="subtitle">Você está prestes a conectar sua conta do Google para receber sua agenda do Google Calendar.</p>
+            {% else %}
+                <h1>Entrar com Google</h1>
+                <p class="subtitle">Você está prestes a entrar usando sua conta do Google.</p>
             {% endif %}
-
-            <form method="post" action="{% url 'account_login' %}">
+            <form method="post">
                 {% csrf_token %}
-                <div class="login-field">
-                    <label for="id_login">Usuário</label>
-                    <input type="text" name="login" id="id_login" autocomplete="username" autofocus
-                           value="{{ form.login.value|default:'' }}" required>
-                </div>
-                <div class="login-field">
-                    <label for="id_password">Senha</label>
-                    <input type="password" name="password" id="id_password" autocomplete="current-password" required>
-                </div>
-                <input type="hidden" name="next" value="{{ redirect_field_value|default:'' }}">
-                <button type="submit" class="btn-login">Entrar</button>
+                <button type="submit" class="btn-login">Continuar</button>
             </form>
         </div>
     </div>

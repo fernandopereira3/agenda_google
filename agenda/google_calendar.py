@@ -12,7 +12,7 @@ from googleapiclient.errors import HttpError
 
 logger = logging.getLogger(__name__)
 
-SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
 
 def get_credentials(user):
@@ -55,81 +55,6 @@ def _service_for(user):
     if credentials is None:
         return None
     return build("calendar", "v3", credentials=credentials, cache_discovery=False)
-
-
-def _event_body(agendamento):
-    inicio = agendamento.data_horario
-    fim = inicio + timedelta(minutes=agendamento.duracao or 60)
-    return {
-        "summary": agendamento.cliente_nome,
-        "description": agendamento.observacoes or "",
-        "start": {"dateTime": inicio.isoformat()},
-        "end": {"dateTime": fim.isoformat()},
-    }
-
-
-def push_agendamento(agendamento):
-    """Cria/atualiza o evento no Google Calendar do profissional dono do agendamento."""
-    service = _service_for(agendamento.profissional)
-    if service is None:
-        return
-
-    body = _event_body(agendamento)
-    try:
-        if agendamento.google_event_id:
-            event = (
-                service.events()
-                .update(
-                    calendarId="primary", eventId=agendamento.google_event_id, body=body
-                )
-                .execute()
-            )
-        else:
-            event = service.events().insert(calendarId="primary", body=body).execute()
-    except HttpError as exc:
-        if exc.resp.status == 404 and agendamento.google_event_id:
-            agendamento.google_event_id = None
-            push_agendamento(agendamento)
-            return
-        logger.warning(
-            "Falha ao sincronizar agendamento %s com o Google: %s", agendamento.id, exc
-        )
-        return
-    except Exception:
-        logger.exception(
-            "Erro inesperado sincronizando agendamento %s com o Google", agendamento.id
-        )
-        return
-
-    agendamento.google_event_id = event["id"]
-    agendamento.google_synced_at = timezone.now()
-    agendamento._skip_google_sync = True
-    agendamento.save(update_fields=["google_event_id", "google_synced_at"])
-
-
-def delete_agendamento_event(agendamento):
-    """Remove o evento correspondente no Google Calendar, se existir."""
-    if not agendamento.google_event_id:
-        return
-    service = _service_for(agendamento.profissional)
-    if service is None:
-        return
-    try:
-        service.events().delete(
-            calendarId="primary", eventId=agendamento.google_event_id
-        ).execute()
-    except HttpError as exc:
-        if exc.resp.status not in (404, 410):
-            logger.warning(
-                "Falha ao apagar evento do Google do agendamento %s: %s",
-                agendamento.id,
-                exc,
-            )
-    except Exception:
-        logger.exception(
-            "Erro inesperado apagando evento do Google do agendamento %s",
-            agendamento.id,
-        )
 
 
 def pull_for_user(user):
@@ -223,7 +148,6 @@ def _aplicar_evento(user, event, resultado):
         for agendamento in Agendamento.objects.filter(
             profissional=user, google_event_id=event["id"]
         ):
-            agendamento._skip_google_sync = True
             agendamento.delete()
             resultado["removidos"] += 1
         return
@@ -258,9 +182,6 @@ def _aplicar_evento(user, event, resultado):
 
     for campo, valor in campos.items():
         setattr(agendamento, campo, valor)
-    # Marca antes de salvar: o sinal post_save lê essa flag na própria instância,
-    # então precisa estar setada já na criação, não depois.
-    agendamento._skip_google_sync = True
     agendamento.save()
 
     resultado["criados" if criado else "atualizados"] += 1

@@ -1,5 +1,8 @@
 Django==6.0.1
+django-allauth==65.19.2
 django-mongodb-backend==6.0.1
+google-api-python-client==2.200.0
+google-auth==2.57.0
 pymongo==4.16.0
 python-dotenv==1.2.1
 whitenoise==6.11.0

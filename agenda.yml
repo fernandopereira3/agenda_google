@@ -5,6 +5,7 @@ services:
   agenda_db:
     image: mongo:latest
     container_name: agenda_db
+    platform: linux/arm64
     command: ["mongod", "--auth"]
     environment:
       - MONGO_INITDB_ROOT_USERNAME=agenda
@@ -29,4 +30,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/fernando/repositorio/volume_data/agenda
+      device: /Users/fernando/Repositorio/volumes/agenda
