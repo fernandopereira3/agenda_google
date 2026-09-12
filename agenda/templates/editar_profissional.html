@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="{% static 'index/img/favicon.ico' %}">
-    <title>Novo profissional</title>
+    <title>Editar profissional</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static 'base.css' %}">
@@ -101,7 +101,7 @@
         <div class="content-wrapper">
             <main class="main-content">
                 <div class="page-header" style="background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); margin-bottom: 24px;">
-                    <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin: 0;">Novo profissional</h1>
+                    <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin: 0;">Editar profissional</h1>
                 </div>
 
                 <div class="card">
@@ -125,21 +125,22 @@
                             {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                         </div>
                         <div class="prof-field">
-                            <label for="{{ form.password1.id_for_label }}">Senha</label>
+                            <label for="{{ form.password1.id_for_label }}">Nova senha (opcional)</label>
                             {{ form.password1 }}
+                            <div class="helptext">Deixe em branco para manter a senha atual.</div>
                             {% if form.password1.errors %}<ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                         </div>
                         <div class="prof-field">
-                            <label for="{{ form.password2.id_for_label }}">Confirmar senha</label>
+                            <label for="{{ form.password2.id_for_label }}">Confirmar nova senha</label>
                             {{ form.password2 }}
                             {% if form.password2.errors %}<ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                         </div>
                         <label class="prof-check">
-                            <input type="checkbox" name="is_staff">
+                            <input type="checkbox" name="is_staff" {% if profissional.is_staff %}checked{% endif %}>
                             Também pode gerenciar profissionais (administrador)
                         </label>
                         <div class="prof-form-actions">
-                            <button type="submit" class="btn-save-prof">Criar</button>
+                            <button type="submit" class="btn-save-prof">Salvar</button>
                             <a href="{% url 'profissionais' %}" class="btn-cancel-prof">Cancelar</a>
                         </div>
                     </form>

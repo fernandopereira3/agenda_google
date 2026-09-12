@@ -5,34 +5,35 @@
 
 /* ── VARIÁVEIS DE TEMA ─────────────────── */
 :root {
-    /* Acento principal: azul marinho institucional */
-    --accent1: #c9a84c;           /* Dourado */
-    --accent2: #1a3a6b;           /* Azul marinho */
-    --accent2-light: #2454a0;
-    --accent2-xlight: #dce8f7;
+    /* Acento principal: azul-petróleo → verde-menta, extraído da logo */
+    --accent1: #5fbe8d;           /* Verde-menta */
+    --accent1-dark: #3a8f63;
+    --accent2: #285a7d;           /* Azul-petróleo */
+    --accent2-light: #3f738f;
+    --accent2-xlight: #dcedf0;
 
     /* Superfícies */
     --bg:            #ffffff;
-    --bg2:           #f2f5fb;
-    --surface:       #e8eef8;
-    --surface-hover: #dde6f4;
+    --bg2:           #f2f7f6;
+    --surface:       #e6f0ee;
+    --surface-hover: #d9e9e6;
 
     /* Texto */
-    --text-primary: #1c2540;
-    --text-muted:   #5a6886;
+    --text-primary: #1c2f38;
+    --text-muted:   #5a7a80;
 
     /* Bordas */
-    --border: #d5dde8;
+    --border: #d3e3e0;
 
     /* Glassmorphism (tema claro) */
     --glass-bg:       rgba(255, 255, 255, 0.92);
     --glass-bg-hover: rgba(255, 255, 255, 0.98);
-    --glass-border:   rgba(26, 58, 107, 0.13);
+    --glass-border:   rgba(40, 90, 125, 0.13);
     --glass-blur:     14px;
 
     /* Sombra / brilho */
-    --shadow: rgba(26, 58, 107, 0.10);
-    --glow:   rgba(26, 58, 107, 0.08);
+    --shadow: rgba(40, 90, 125, 0.10);
+    --glow:   rgba(40, 90, 125, 0.08);
 
     /* Raios */
     --radius-sm: 8px;
@@ -64,10 +65,10 @@ a { text-decoration: none; color: inherit; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb {
-    background: rgba(26, 58, 107, 0.22);
+    background: rgba(40, 90, 125, 0.22);
     border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(26, 58, 107, 0.38); }
+::-webkit-scrollbar-thumb:hover { background: rgba(40, 90, 125, 0.38); }
 
 /* ── HEADER ─────────────────────────────── */
 .header {
@@ -81,7 +82,7 @@ a { text-decoration: none; color: inherit; }
     position: sticky;
     top: 0;
     z-index: 200;
-    box-shadow: 0 2px 16px rgba(26, 58, 107, 0.28);
+    box-shadow: 0 2px 16px rgba(40, 90, 125, 0.28);
 }
 
 .header-left {
@@ -96,21 +97,18 @@ a { text-decoration: none; color: inherit; }
  * pois o fundo e a borda dependem de :empty ou podem ser removidos via classe.
  */
 .logo {
-    width: 148px;
-    height: 46px;
+    width: 190px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-sm);
     overflow: hidden;
-    /* Placeholder visual — remova as duas linhas abaixo ao inserir a logo */
-    border: 1.5px dashed rgba(255, 255, 255, 0.28);
-    background: rgba(255, 255, 255, 0.07);
 }
 
 .logo-img {
-    max-height: 42px;
-    max-width: 144px;
+    max-height: 66px;
+    max-width: 186px;
     object-fit: contain;
     display: block;
 }
@@ -220,7 +218,7 @@ a { text-decoration: none; color: inherit; }
 
 .nav-buttons:hover {
     width: 220px;
-    box-shadow: 4px 0 20px rgba(26, 58, 107, 0.12);
+    box-shadow: 4px 0 20px rgba(40, 90, 125, 0.12);
 }
 
 /* Separador de seções na sidebar */
@@ -260,14 +258,14 @@ a { text-decoration: none; color: inherit; }
     background: var(--surface);
     color: var(--accent2);
     border-color: var(--border);
-    border-left-color: rgba(26, 58, 107, 0.25);
+    border-left-color: rgba(40, 90, 125, 0.25);
 }
 
 .nav-btn.active {
     background: var(--accent2-xlight);
     color: var(--accent2);
     font-weight: 600;
-    border-color: rgba(26, 58, 107, 0.18);
+    border-color: rgba(40, 90, 125, 0.18);
     border-left-color: var(--accent2);
 }
 
@@ -340,7 +338,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge-primary { background: var(--accent2-xlight); color: var(--accent2); }
-.badge-gold    { background: rgba(201, 168, 76, 0.15); color: #8a6d1a; }
+.badge-gold    { background: rgba(95, 190, 141, 0.15); color: #1f6b45; }
 .badge-success { background: rgba(22, 163, 74, 0.10); color: #16a34a; }
 .badge-danger  { background: rgba(220, 38, 38, 0.10); color: #dc2626; }
 .badge-warning { background: rgba(234, 179, 8, 0.12); color: #ca8a04; }
@@ -375,7 +373,7 @@ h1, h2, h3, h4, h5, h6 {
         top: 64px;
         z-index: 100;
         background: var(--bg);
-        box-shadow: 0 2px 8px rgba(26, 58, 107, 0.06);
+        box-shadow: 0 2px 8px rgba(40, 90, 125, 0.06);
         transition: none;
     }
 

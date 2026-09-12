@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="{% static 'index/img/favicon.ico' %}">
-    <title>Entrar — Agenda</title>
+    <title>Criar usuário — Agenda</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static 'base.css' %}">
@@ -75,6 +75,14 @@
             border-color: var(--accent2-light);
         }
 
+        .login-field .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 6px 0 0;
+            color: #b3261e;
+            font-size: 0.78rem;
+        }
+
         .login-errors {
             background: #fdecea;
             color: #b3261e;
@@ -122,8 +130,8 @@
             <div class="logo">
                 <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img">
             </div>
-            <h1>Acesse sua agenda</h1>
-            <p class="subtitle">Entre com seu usuário e senha.</p>
+            <h1>Criar usuário</h1>
+            <p class="subtitle">Cadastre-se para acessar a agenda.</p>
 
             {% if form.non_field_errors %}
                 <div class="login-errors">
@@ -131,22 +139,35 @@
                 </div>
             {% endif %}
 
-            <form method="post" action="{% url 'account_login' %}">
+            <form method="post" action="{% url 'account_signup' %}">
                 {% csrf_token %}
                 <div class="login-field">
-                    <label for="id_login">Usuário</label>
-                    <input type="text" name="login" id="id_login" autocomplete="username" autofocus
-                           value="{{ form.login.value|default:'' }}" required>
+                    <label for="id_username">Usuário</label>
+                    <input type="text" name="username" id="id_username" autocomplete="username" autofocus
+                           value="{{ form.username.value|default:'' }}" required>
+                    {% if form.username.errors %}
+                        <ul class="errorlist">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
                 </div>
                 <div class="login-field">
-                    <label for="id_password">Senha</label>
-                    <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+                    <label for="id_password1">Senha</label>
+                    <input type="password" name="password1" id="id_password1" autocomplete="new-password" required>
+                    {% if form.password1.errors %}
+                        <ul class="errorlist">{% for error in form.password1.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+                <div class="login-field">
+                    <label for="id_password2">Confirmar senha</label>
+                    <input type="password" name="password2" id="id_password2" autocomplete="new-password" required>
+                    {% if form.password2.errors %}
+                        <ul class="errorlist">{% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
                 </div>
                 <input type="hidden" name="next" value="{{ redirect_field_value|default:'' }}">
-                <button type="submit" class="btn-login">Entrar</button>
+                <button type="submit" class="btn-login">Criar usuário</button>
             </form>
 
-            <p class="login-footer">Não tem uma conta? <a href="{% url 'account_signup' %}">Criar usuário</a></p>
+            <p class="login-footer">Já tem uma conta? <a href="{% url 'account_login' %}">Entrar</a></p>
         </div>
     </div>
 </body>

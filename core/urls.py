@@ -14,6 +14,7 @@ from agenda.views import (
 from agenda.views_admin import (
     listar_profissionais,
     criar_profissional,
+    editar_profissional,
     alternar_ativo_profissional,
 )
 
@@ -47,6 +48,11 @@ urlpatterns = [
     path("agenda/sincronizar/", sincronizar_google, name="sincronizar_google"),
     path("profissionais/", listar_profissionais, name="profissionais"),
     path("profissionais/novo/", criar_profissional, name="criar_profissional"),
+    path(
+        "profissionais/<str:id>/editar/",
+        editar_profissional,
+        name="editar_profissional",
+    ),
     path(
         "profissionais/<str:id>/alternar-ativo/",
         alternar_ativo_profissional,

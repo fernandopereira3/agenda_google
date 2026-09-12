@@ -118,9 +118,7 @@ LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "account_login"
 
-# Login tradicional (usuário/senha). Contas são criadas pelo administrador
-# via /admin/ — não há cadastro público (ver core/account_adapter.py).
-ACCOUNT_ADAPTER = "core.account_adapter.NoSignupAccountAdapter"
+# Login tradicional (usuário/senha), com cadastro público habilitado.
 ACCOUNT_LOGIN_METHODS = {"username"}
 ACCOUNT_SIGNUP_FIELDS = ["username*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "none"

@@ -76,7 +76,7 @@
     <header class="header">
         <div class="header-left">
             <div class="logo">
-                <img src="{% static 'home/img/logo.png' %}" alt="Logo" class="logo-img">
+                <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img">
             </div>
         </div>
         <div class="header-right">
@@ -137,6 +137,7 @@
                                 </div>
                             </div>
                             <div class="prof-actions">
+                                <a href="{% url 'editar_profissional' p.id %}" class="btn-toggle-active">Editar</a>
                                 {% if p != user %}
                                 <form method="post" action="{% url 'alternar_ativo_profissional' p.id %}">
                                     {% csrf_token %}
